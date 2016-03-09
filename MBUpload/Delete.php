@@ -25,7 +25,39 @@
 
 namespace MBUpload;
 
-class Delete
-{
+class Delete {
+	/**
+     * Verificação das variáveis que não podem ser nulas
+     */
+    if (empty($realName)) {
+        return ['status' => 0, 'error' => '01 - $realName vazio', 'msg' => 'O nome real do arquivo é obrigatório.'];
+    }
+    if (empty($pathServer)) {
+        return ['status' => 0, 'error' => '02 - $sizeArchive vazio', 'msg' => 'O tamanho real do arquivo é obrigatório.'];
+    }
 
+    //Verifica se a variável $personalFolder retornou vazia, se não retornou vazia concat com a $pathServer para ter o caminho final
+    if (empty($personalFolder)) {
+        $finalPath = $pathServer;
+    } else {
+        $finalPath = $pathServer.$personalFolder;
+    }
+    //Verifica se o caminho final existe, caso não exista retorna array com o erro
+    if (is_dir($finalPath)) {
+        //Verifica se o arquivo existe no caminho final, caso não exista retorna array com erro
+        if (file_exists($finalPath.$realName)) {
+            //Tenta deletar o arquivo
+            $deleteArchive = unlink($finalPath.$realName);
+            //Caso deletado com sucesso, retorna array de sucesso, caso erro, retorna array com erro
+            if ($deleteArchive) {
+                return ['status' => 1, 'msg' => 'Arquivo deletado do servidor com sucesso.'];
+            } else {
+                return ['status' => 0, 'error' => '05 - arquivo encontrado, mas houve um erro ao deletar', 'msg' => 'Arquivo encontrado na pasta do servidor. Mas ocorreu um erro ao deletar.'];
+            }
+        } else {
+            return ['status' => 0, 'error' => '04 - arquivo não encontrado no diretório', 'msg' => 'Arquivo não encontrado na pasta do servidor.'];
+        }
+    } else {
+        return ['status' => 0, 'error' => '03 - $finalPath não é um diretório válido', 'msg' => 'Erro no servidor, caminho físico não encontrado.'];
+    }
 }
